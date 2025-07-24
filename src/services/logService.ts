@@ -1,7 +1,7 @@
 import { Context, Logger, $ } from 'koishi'
-import { Config } from './config'
-import { database_name_log } from '.'
-export * from './config'
+import { Config } from '../config'
+import { database_name_log } from '..'
+export * from '../config'
 
 
 export class LogService {
