@@ -29,21 +29,29 @@ sequenceDiagram
 	participant trans as Transaction Engine
 
 	C->>S: 发起支付请求
-	S-->>order:向订单管理系统创建订单
-	Note left of order:创建订单并将状态设置为进行中
-	order-->>S:订单管理系统返回订单信息
+	rect rgb(191,223,255)
+		S-->>order:向订单管理系统创建订单
+		Note over order:创建订单并将状态设置为进行中
+		order-->>S:订单管理系统返回订单信息
+		end
 	S->>C:返回订单信息以供状态查询
-	S-->>trans:使用订单信息发起操作请求
-	trans-->>order:验证订单有效性
-	order-->>trans:返回订单是否有效
-	Note right of trans:向数据库写入数据
-	trans-->>order:操作结束将交易账单设置为已完成
-	Note left of order:将状态设置为完成/失败
+	rect rgb(191,223,255)
+		S-->>trans:使用订单信息发起操作请求
+		trans-->>order:验证订单有效性
+		order-->>trans:返回订单是否有效
+		Note over trans:向数据库写入数据
+		trans-->>order:操作结束将交易账单设置为已完成
+		Note over order:将订单状态设置为完成/失败
+	end
 	C->>S:查询订单
-	S-->>order:获取订单信息
-	order-->>S:订单信息
+	rect rgb(191,223,255)
+		S-->>order:获取订单信息
+		order-->>S:订单信息
+	end
 	S->>C:订单信息
 ```
+
+
 
 ## 开发者快速接入指南
 
