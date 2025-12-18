@@ -28,18 +28,18 @@ sequenceDiagram
 	participant order as Order Manager
 	participant trans as Transaction Engine
 
-	C->S: 发起支付请求
-	S-->order:向订单管理系统创建订单
+	C->>S: 发起支付请求
+	S-->>order:向订单管理系统创建订单
 	Note left of order:创建订单并将状态设置为进行中
-	order-->S:订单管理系统返回订单信息
-	S->C:返回订单信息以供状态查询
-	S-->trans:使用订单信息发起操作请求
-	trans-->order:验证订单有效性
-	order-->trans:返回订单是否有效
+	order-->>S:订单管理系统返回订单信息
+	S->>C:返回订单信息以供状态查询
+	S-->>trans:使用订单信息发起操作请求
+	trans-->>order:验证订单有效性
+	order-->>trans:返回订单是否有效
 	Note right of trans:向数据库写入数据
-	trans-->order:操作结束将交易账单设置为已完成
+	trans-->>order:操作结束将交易账单设置为已完成
 	Note left of order:将状态设置为完成/失败
-	trans-->S:返回交易信息
+	trans-->>S:返回交易信息
 ```
 
 ## 开发者快速接入指南
