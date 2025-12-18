@@ -39,7 +39,10 @@ sequenceDiagram
 	Note right of trans:向数据库写入数据
 	trans-->>order:操作结束将交易账单设置为已完成
 	Note left of order:将状态设置为完成/失败
-	trans-->>S:返回交易信息
+	C->>S:查询订单
+	S-->>order:获取订单信息
+	order-->>S:订单信息
+	S->>C:订单信息
 ```
 
 ## 开发者快速接入指南
