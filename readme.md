@@ -23,32 +23,44 @@
 
 ```mermaid
 sequenceDiagram
-	participant C as other plugin
-	participant S as Service
-	participant order as Order Manager
-	participant trans as Transaction Engine
-
-	C->>S: 发起支付请求
-	rect rgb(191,223,255)
-		S-->>order:向订单管理系统创建订单
-		Note over order:创建订单并将状态设置为进行中
-		order-->>S:订单管理系统返回订单信息
-		end
-	S->>C:返回订单信息以供状态查询
-	rect rgb(191,223,255)
-		S-->>trans:使用订单信息发起操作请求
-		trans-->>order:验证订单有效性
-		order-->>trans:返回订单是否有效
-		Note over trans:向数据库写入数据
-		trans-->>order:操作结束将交易账单设置为已完成
-		Note over order:将订单状态设置为完成/失败
-	end
-	C->>S:查询订单
-	rect rgb(191,223,255)
-		S-->>order:获取订单信息
-		order-->>S:订单信息
-	end
-	S->>C:订单信息
+    participant C as other plugin
+    participant S as Service
+    participant order as Order Manager
+    participant trans as Transaction Engine
+    participant DB as Database
+    
+    C->>S: 发起支付请求
+    S-->>order: 创建订单(状态:PENDING)
+    order-->>S: 返回订单信息
+    S->>C: 返回订单信息
+    
+    par 超时监控
+        order->>order: 超时检查
+        alt 超时且未完成
+            order->>order: 标记订单为FAILED
+        end
+    and 业务处理
+        S-->>trans: 发起操作请求
+        trans-->>order: 验证订单有效性
+        alt 订单状态为PENDING
+            order-->>trans: 订单有效
+            trans->>trans: 获取分布式锁(订单ID)
+            trans->>DB: 写入账户变更
+            DB-->>trans: 写入成功
+            trans-->>order: 尝试标记订单为SUCCESS
+            alt 标记成功
+                order-->>trans: 确认成功
+            else 标记失败(已超时)
+                order-->>trans: 订单已FAILED
+                trans->>DB: 回滚账户变更
+                DB-->>trans: 回滚成功
+            end
+            trans->>trans: 释放分布式锁
+        else 订单状态不为PENDING
+            order-->>trans: 订单无效
+            trans-->>S: 返回失败
+        end
+    end
 ```
 
 
